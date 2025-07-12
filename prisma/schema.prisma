@@ -1,0 +1,101 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum PollType {
+  SINGLE_CHOICE
+  MULTI_CHOICE
+  RANKING
+  APPROVAL
+}
+
+enum PollStatus {
+  DRAFT
+  SCHEDULED
+  ACTIVE
+  COMPLETED
+}
+
+model User {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String
+  email         String    @unique(map: "user_email_idx")
+  emailVerified DateTime? @db.Timestamp(6)
+  image         String?
+  password      String?
+  role          Role      @default(USER)
+
+  createdAt DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt DateTime  @updatedAt
+  Session   Session[]
+  Poll      Poll[]
+}
+
+model Session {
+  sessionToken String   @id @unique
+  userId       String   @db.Uuid
+  expires      DateTime @db.Timestamp(6)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now()) @db.Timestamp(6)
+  updatedAt    DateTime @updatedAt @db.Timestamp(6)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime @db.Timestamp(6)
+
+  @@id([identifier, token])
+}
+
+model Poll {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title          String
+  description    String
+  createdAt      DateTime     @default(now()) @db.Timestamp(6)
+  updatedAt      DateTime     @updatedAt @db.Timestamp(6)
+  userId         String       @db.Uuid
+  status         PollStatus   @default(DRAFT)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pollType       PollType
+  dueDate        DateTime?
+  scheduleDate   DateTime?
+  endDate        DateTime?
+  startDate      DateTime?
+  expectedVoters Int?
+  options        String[]
+  Option         Option[]
+  PollAnswer     PollAnswer[]
+}
+
+model Option {
+  id           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pollId       String      @db.Uuid
+  poll         Poll        @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  name         String
+  createdAt    DateTime    @default(now()) @db.Timestamp(6)
+  updatedAt    DateTime    @updatedAt @db.Timestamp(6)
+  pollAnswerId String?     @db.Uuid
+  PollAnswer   PollAnswer? @relation(fields: [pollAnswerId], references: [id])
+}
+
+model PollAnswer {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pollId          String   @db.Uuid
+  poll            Poll     @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now()) @db.Timestamp(6)
+  updatedAt       DateTime @updatedAt @db.Timestamp(6)
+  chosenOptionIds String[]
+  Option          Option[]
+}

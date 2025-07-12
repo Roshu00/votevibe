@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
+import Link from "next/link";
 
 export function Hero() {
   return (
@@ -16,14 +17,16 @@ export function Hero() {
             accessible, secure, and engaging for everyone.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              variant="default"
-              size="lg"
-              className="flex items-center justify-center"
-            >
-              Start Voting Now
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+            <Link href="/creator">
+              <Button
+                variant="default"
+                size="lg"
+                className="flex items-center justify-center"
+              >
+                Start Voting Now
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
             <Button variant="outline" size="lg">
               Learn More
             </Button>

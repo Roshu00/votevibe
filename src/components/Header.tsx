@@ -3,17 +3,18 @@
 import { Vote, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Container } from "./ui/container";
+import { Container } from "@/components/ui/container";
+import Link from "next/link";
 
 export function Header() {
   return (
     <header className="py-6">
       <Container>
         <nav className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
+          <Link href="/" className="flex items-center space-x-2">
             <Vote className="h-8 w-8 text-blue-600" />
             <span className="text-2xl font-bold text-gray-900">VoteVibe</span>
-          </div>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
@@ -35,6 +36,11 @@ export function Header() {
             >
               Contact
             </a>
+            <Link href="/creator">
+              <Button variant="outline" size="sm">
+                Create Poll
+              </Button>
+            </Link>
             <Button variant="default" size="sm">
               Get Started
             </Button>
@@ -68,6 +74,12 @@ export function Header() {
                   >
                     Contact
                   </a>
+                  <Link
+                    href="/creator"
+                    className="text-lg font-medium hover:text-blue-600 transition-colors"
+                  >
+                    Create Poll
+                  </Link>
                   <Button variant="default" className="mt-4">
                     Get Started
                   </Button>
