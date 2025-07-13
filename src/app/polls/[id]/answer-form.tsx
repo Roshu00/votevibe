@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
 import { Separator } from "@/components/ui/separator";
-import { Poll } from "@prisma/client";
+import { Option, Poll, PollType } from "@prisma/client";
 import {
   BarChart3,
   Calendar,
@@ -18,9 +18,13 @@ import {
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Header } from "./header";
+import { answerPoll } from "@/lib/actions/poll.action";
+import { toast } from "sonner";
 
 interface AnswerPollProps {
-  poll: Poll;
+  poll: Poll & {
+    options: Option[];
+  };
 }
 
 function AnswerPollClient({ poll }: AnswerPollProps) {
@@ -40,7 +44,7 @@ function AnswerPollClient({ poll }: AnswerPollProps) {
   const totalVotes = mockResults.reduce((sum, result) => sum + result.votes, 0);
 
   const handleOptionSelect = (option: string) => {
-    if (poll.pollType === "SINGLE_CHOICE") {
+    if (poll.pollType === PollType.SINGLE_CHOICE) {
       setSelectedOptions([option]);
     } else {
       setSelectedOptions((prev) =>
@@ -56,11 +60,15 @@ function AnswerPollClient({ poll }: AnswerPollProps) {
 
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const res = await answerPoll(poll.id, selectedOptions);
 
-    setHasVoted(true);
-    setShowResults(true);
+    if (res.success) {
+      setHasVoted(true);
+      setShowResults(true);
+    } else {
+      toast.error(res.message);
+    }
+
     setIsSubmitting(false);
   };
 
@@ -133,16 +141,16 @@ function AnswerPollClient({ poll }: AnswerPollProps) {
                           type="radio"
                           id={`option-${index}`}
                           name="poll-option"
-                          value={option}
-                          checked={selectedOptions.includes(option)}
-                          onChange={() => handleOptionSelect(option)}
+                          value={option.id}
+                          checked={selectedOptions.includes(option.id)}
+                          onChange={() => handleOptionSelect(option.id)}
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                         />
                         <label
                           htmlFor={`option-${index}`}
                           className="text-lg cursor-pointer"
                         >
-                          {option}
+                          {option.name}
                         </label>
                       </div>
                     ))}
@@ -154,15 +162,15 @@ function AnswerPollClient({ poll }: AnswerPollProps) {
                         <input
                           type="checkbox"
                           id={`option-${index}`}
-                          checked={selectedOptions.includes(option)}
-                          onChange={() => handleOptionSelect(option)}
+                          checked={selectedOptions.includes(option.id)}
+                          onChange={() => handleOptionSelect(option.id)}
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                         />
                         <label
                           htmlFor={`option-${index}`}
                           className="text-lg cursor-pointer"
                         >
-                          {option}
+                          {option.name}
                         </label>
                       </div>
                     ))}
@@ -218,7 +226,9 @@ function AnswerPollClient({ poll }: AnswerPollProps) {
                   {mockResults.map((result, index) => (
                     <div key={index} className="space-y-2">
                       <div className="flex justify-between items-center">
-                        <span className="font-medium">{result.option}</span>
+                        <span className="font-medium">
+                          {result.option.name}
+                        </span>
                         <span className="text-sm text-gray-600">
                           {result.votes} votes ({result.percentage}%)
                         </span>

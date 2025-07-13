@@ -32,6 +32,9 @@ const PollPage = async ({ params }: { params: Promise<{ id: string }> }) => {
     where: {
       id,
     },
+    include: {
+      options: true,
+    },
   });
 
   if (!poll) {

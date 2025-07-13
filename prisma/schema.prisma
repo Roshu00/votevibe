@@ -74,20 +74,18 @@ model Poll {
   endDate        DateTime?
   startDate      DateTime?
   expectedVoters Int?
-  options        String[]
-  Option         Option[]
-  PollAnswer     PollAnswer[]
+  options        Option[]
+  answers        PollAnswer[]
 }
 
 model Option {
-  id           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  pollId       String      @db.Uuid
-  poll         Poll        @relation(fields: [pollId], references: [id], onDelete: Cascade)
-  name         String
-  createdAt    DateTime    @default(now()) @db.Timestamp(6)
-  updatedAt    DateTime    @updatedAt @db.Timestamp(6)
-  pollAnswerId String?     @db.Uuid
-  PollAnswer   PollAnswer? @relation(fields: [pollAnswerId], references: [id])
+  id        String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pollId    String       @db.Uuid
+  poll      Poll         @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  name      String
+  createdAt DateTime     @default(now()) @db.Timestamp(6)
+  updatedAt DateTime     @updatedAt @db.Timestamp(6)
+  answers   PollAnswer[]
 }
 
 model PollAnswer {
@@ -97,5 +95,5 @@ model PollAnswer {
   createdAt       DateTime @default(now()) @db.Timestamp(6)
   updatedAt       DateTime @updatedAt @db.Timestamp(6)
   chosenOptionIds String[]
-  Option          Option[]
+  options         Option[]
 }

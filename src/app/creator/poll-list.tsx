@@ -12,7 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TabsContent } from "@/components/ui/tabs";
-import { Poll } from "@prisma/client";
+import { activatePoll } from "@/lib/actions/poll.action";
+import { Option, Poll, PollStatus } from "@prisma/client";
 import {
   BarChart3,
   Calendar,
@@ -20,6 +21,7 @@ import {
   Edit,
   Eye,
   MoreHorizontal,
+  PlayIcon,
   Plus,
   Search,
   Share2,
@@ -31,7 +33,9 @@ import Link from "next/link";
 import { useState } from "react";
 
 interface PollListProps {
-  polls: Poll[];
+  polls: (Poll & {
+    options: Option[];
+  })[];
 }
 
 export function PollList({ polls }: PollListProps) {
@@ -45,15 +49,6 @@ export function PollList({ polls }: PollListProps) {
     const matchesType = typeFilter === "all" || poll.pollType === typeFilter;
     return matchesSearch && matchesType;
   });
-
-  const getStatusBadge = (poll: Poll) => {
-    // Simple logic - you can enhance this based on your needs
-    const isActive = poll.expectedVoters && poll.expectedVoters > 0;
-    if (isActive) {
-      return <Badge className="bg-green-100 text-green-800">Active</Badge>;
-    }
-    return <Badge variant="secondary">Draft</Badge>;
-  };
 
   const getTypeLabel = (type: string) => {
     return type.replace("_", " ");
@@ -109,7 +104,7 @@ export function PollList({ polls }: PollListProps) {
                     <h3 className="text-lg font-semibold text-gray-900">
                       {poll.title}
                     </h3>
-                    {getStatusBadge(poll)}
+                    <Badge>{poll.status}</Badge>
                   </div>
                   <p className="text-gray-600 mb-3">{poll.description}</p>
 
@@ -135,23 +130,34 @@ export function PollList({ polls }: PollListProps) {
                   </div>
 
                   <div className="flex items-center gap-2">
+                    {poll.status === PollStatus.DRAFT && (
+                      <Button size="sm" onClick={() => activatePoll(poll.id)}>
+                        <PlayIcon />
+                        Activate
+                      </Button>
+                    )}
                     <Button size="sm" variant="outline" asChild>
                       <Link href={`/polls/${poll.id}`}>
                         <Eye className="h-4 w-4 mr-2" />
                         View
                       </Link>
                     </Button>
+
                     <Button size="sm" variant="outline">
                       <Share2 className="h-4 w-4 mr-2" />
                       Share
                     </Button>
-                    <Button size="sm" variant="outline">
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit
+                    <Button size="sm" variant="outline" asChild>
+                      <Link href={`/creator/polls/${poll.id}/edit`}>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit
+                      </Link>
                     </Button>
-                    <Button size="sm" variant="outline">
-                      <BarChart3 className="h-4 w-4 mr-2" />
-                      Results
+                    <Button size="sm" variant="outline" asChild>
+                      <Link href={`/creator/polls/${poll.id}`}>
+                        <BarChart3 className="h-4 w-4 mr-2" />
+                        Results
+                      </Link>
                     </Button>
                     <Button
                       size="sm"

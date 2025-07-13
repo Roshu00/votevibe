@@ -41,7 +41,7 @@ export default async function CreatorDashboard() {
                 Creator Dashboard
               </Badge>
               <Button asChild>
-                <Link href="/creator/new">
+                <Link href="/creator/polls/create">
                   <Plus className="h-4 w-4 mr-2" />
                   Create Poll
                 </Link>
